@@ -5,7 +5,7 @@ layout(location = 0) in vec4 position;
 
 void main()
 {
-   gl_Position = position;
+    gl_Position = position;
 };
 
 #shader fragment
@@ -16,5 +16,5 @@ in vec4 gl_FragCoord;
 
 void main()
 {
-   color = vec4(gl_FragCoord.xy, 500, 500) / 500;
+    color = vec4(gl_FragCoord.xy, 500, 500) / 500;
 };
