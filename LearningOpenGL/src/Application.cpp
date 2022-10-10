@@ -7,23 +7,11 @@
 #include <string>
 #include <sstream>
 
-/* ERROR CHECKING */
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__));
+#include "Renderer.h"
 
-static void GLClearError() {
-    while (glGetError() != GL_NO_ERROR);
-}
+#include "VertexBuffer.h"
 
-static bool GLLogCall(const char* function, const char* file, int line) {
-    while (GLenum error = glGetError()) {
-        std::cout << "[OpenGL Error] (" << error << ") : " << function << " " << file << " : " << line << std::endl;
-        return false;
-    }
-    return true;
-}
+#include "IndexBuffer.h"
 
 /* SHADER/PROGRAM GENERATION AND COMPILATION */
 // Struct for parsed GLSL code
@@ -120,6 +108,10 @@ int main(void)
     if (!glfwInit()) // Initialize the library
         return -1;
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL); // Create a windowed mode window and its OpenGL context
     if (!window)
     {
@@ -129,60 +121,83 @@ int main(void)
 
     glfwMakeContextCurrent(window); // Make the window's context current
 
+    glfwSwapInterval(1);
+
     if (glewInit() != GLEW_OK) // initialses glew AFTER glfw creates a current context
     {
         std::cout << "ERROR!" << std::endl;
     }
 
     std::cout << glGetString(GL_VERSION) << std::endl; // Displays OpenGL version in console
-
-    float positions[8] // Defining a vertex buffer
     {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f,  0.5f,
-        -0.5f,  0.5f 
-    };
+        float squarePositions[16] // Defining a vertex buffer
+        {
+            -0.5f, -0.5f,         -0.2f, -0.2f,
+             0.5f, -0.5f,          0.2f, -0.2f,
+             0.5f,  0.5f,          0.2f,  0.2f,
+            -0.5f,  0.5f,         -0.2f,  0.2f
+        };    /* big                  small */
 
-    unsigned int indices[6] // Defining an index buffer
-    {
-        0, 1, 2,
-        2, 3, 0
-    };
+        unsigned int indices[6] // Defining an index buffer
+        {
+            0, 1, 2,
+            2, 3, 0
+        };
 
-    unsigned int buffer;
-    GLCall(glGenBuffers(1, &buffer));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer)); // Binds a buffer object ID to the specified buffer binding point (array)
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW)); // Pushes data to array buffer
-                                                                                  
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0)); // Defines behavior of vertex attribute pointer 0
+        unsigned int vao;
+        glGenVertexArrays(1, &vao);
+        GLCall(glBindVertexArray(vao)); // Binds a vertex array object (vao)
 
-    unsigned int ibo;
-    GLCall(glGenBuffers(1, &ibo));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo)); // Binds a buffer object ID to the specified buffer binding point (element array)
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+        VertexBuffer vb(squarePositions, sizeof(squarePositions));
 
-    ShaderProgramSource source = parseShader("res/shaders/Basic.shader"); // Parses shader file into ShaderProgramSource struct
-    unsigned int program = createProgram(source.VertexSource, source.FragmentSource); // Creates a program from each part of the ShaderProgramSource struct
-    GLCall(glUseProgram(program)); // Tells OpenGL to use program we created
+        GLCall(glEnableVertexAttribArray(0)); //enable attrib pointers 0 and 1 of current vao
+        GLCall(glEnableVertexAttribArray(1));
+        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(0 * sizeof(float))));
+        GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(2 * sizeof(float))));
 
-    // Loop until the user closes the window
-    while (!glfwWindowShouldClose(window))
-    {
-        // Render here
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        IndexBuffer ib(indices, 6);
 
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        ShaderProgramSource source = parseShader("res/shaders/Basic.shader"); // Parses shader file into ShaderProgramSource struct
+        unsigned int program = createProgram(source.VertexSource, source.FragmentSource); // Creates a program from each part of the ShaderProgramSource struct
+        GLCall(glUseProgram(program)); // Tells OpenGL to use program we created
 
-        // Swap front and back buffers
-        GLCall(glfwSwapBuffers(window));
+        GLCall(int location = glGetUniformLocation(program, "u_Color"));
+        ASSERT(location != -1);
 
-        // Poll for and process events
-        GLCall(glfwPollEvents());
+        float r = 0.0f;
+        float increment = 0.01f;
+        // Loop until the user closes the window
+        while (!glfwWindowShouldClose(window))
+        {
+            // Render here
+            GLCall(glClear(GL_COLOR_BUFFER_BIT));
+
+            GLCall(glUseProgram(program));
+            GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+
+            GLCall(glBindVertexArray(vao));
+            ib.Bind();
+
+            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+            // Logic for color incrementation
+            r += increment;
+            if (r > 1.0f) {
+                increment = -0.01f;
+            }
+            else if (r < 0.0f) {
+                increment = 0.01f;
+            }
+
+            // Swap front and back buffers
+            GLCall(glfwSwapBuffers(window));
+
+            // Poll for and process events
+            GLCall(glfwPollEvents());
+        }
+
+        GLCall(glDeleteProgram(program));
     }
-
-    GLCall(glDeleteProgram(program));
 
     glfwTerminate();
     return 0;
