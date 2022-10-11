@@ -13,6 +13,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -25,7 +26,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL); // Create a windowed mode window and its OpenGL context
+    window = glfwCreateWindow(512, 512, "GOJO", NULL, NULL); // Create a windowed mode window and its OpenGL context
     if (!window)
     {
         glfwTerminate();
@@ -43,12 +44,12 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl; // Displays OpenGL version in console
     {
-        float squarePositions[8] // Defining a vertex buffer
+        float vertexData[16] // Defining a vertex buffer
         {
-            -0.5f, -0.5f,
-             0.5f, -0.5f,
-             0.5f,  0.5f,
-            -0.5f,  0.5f
+            -0.5f, -0.5f,       0.0f,  0.0f,    // 0
+             0.5f, -0.5f,       1.0f,  0.0f,    // 1
+             0.5f,  0.5f,       1.0f,  1.0f,    // 2
+            -0.5f,  0.5f,       0.0f,  1.0f     // 3
         };
 
         unsigned int indices[6] // Defining an index buffer
@@ -57,11 +58,15 @@ int main(void)
             2, 3, 0
         };
 
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
         VertexArray vao;
 
-        VertexBuffer vbo(squarePositions, sizeof(squarePositions));
+        VertexBuffer vbo(vertexData, sizeof(vertexData));
 
         VertexBufferLayout layout;
+        layout.Push<float>(2);
         layout.Push<float>(2);
         vao.AddBuffer(vbo, layout);
 
@@ -71,13 +76,16 @@ int main(void)
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
+        Texture texture("res/textures/GojoTexture256x256.png");
+        texture.Bind(0);
+        shader.SetUniform1i("u_Texture", 0);
+
         vao.Unbind();
         vbo.Unbind();
         ibo.Unbind();
         shader.Unbind();
 
         Renderer renderer;
-
 
         float r = 0.0f;
         float increment = 0.01f;
