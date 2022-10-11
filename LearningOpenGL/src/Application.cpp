@@ -19,7 +19,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL); // Create a windowed mode window and its OpenGL context
+    window = glfwCreateWindow(512, 512, "Spinny Cube", NULL, NULL); // Create a windowed mode window and its OpenGL context
     if (!window)
     {
         glfwTerminate();
@@ -29,6 +29,9 @@ int main(void)
     glfwMakeContextCurrent(window); // Make the window's context current
 
     glfwSwapInterval(1);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     if (glewInit() != GLEW_OK) // initialses glew AFTER glfw creates a current context
     {
@@ -115,7 +118,7 @@ int main(void)
             ib.Bind();
 
             GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr));
-            shader.SetUniform4f("colorVector", 1.0f, 0.3f, 0.8f, 1.0f);
+            shader.SetUniform4f("colorVector", 1.0f, 0.3f, 0.8f, 0.5f);
             GLCall(glDrawElements(GL_LINE_STRIP, 36, GL_UNSIGNED_INT, nullptr));
 
             // Logic for color incrementation
