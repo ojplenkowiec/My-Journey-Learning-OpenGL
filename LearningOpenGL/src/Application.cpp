@@ -93,7 +93,6 @@ int main(void)
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
-        shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
         va.Unbind();
         vb.Unbind();
@@ -109,21 +108,24 @@ int main(void)
             GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
             shader.Bind();
-            shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+            shader.SetUniform1f("theta", r);
+            shader.SetUniform4f("colorVector", 0.1f, 0.3f, 0.8f, 1.0f);
 
             va.Bind();
             ib.Bind();
 
             GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr));
+            shader.SetUniform4f("colorVector", 1.0f, 0.3f, 0.8f, 1.0f);
+            GLCall(glDrawElements(GL_LINE_STRIP, 36, GL_UNSIGNED_INT, nullptr));
 
             // Logic for color incrementation
             r += increment;
-            if (r > 1.0f) {
-                increment = -0.01f;
-            }
-            else if (r < 0.0f) {
-                increment = 0.01f;
-            }
+            //if (r > 1.0f) {
+            //    increment = -0.01f;
+            //}
+            //else if (r < 0.0f) {
+            //    increment = 0.01f;
+            //}
 
             // Swap front and back buffers
             GLCall(glfwSwapBuffers(window));
