@@ -1,10 +1,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -49,10 +45,37 @@ int main(void)
             -0.5f,  0.5f
         };
 
-        unsigned int indices[6] // Defining an index buffer
+        float cubePositions[24]
+        {
+             0.5,  0.5,  0.5, // top front right        [0]
+             0.5,  0.5, -0.5, // top back right         [1]
+            -0.5,  0.5,  0.5, // top front left         [2]
+            -0.5,  0.5, -0.5, // top back left          [3]
+             0.5, -0.5,  0.5, // bottom front right     [4]
+             0.5, -0.5, -0.5, // bottom back right      [5]
+            -0.5, -0.5,  0.5, // bottom front left      [6]
+            -0.5, -0.5, -0.5, // bottom back left       [7]
+        };
+
+        unsigned int indices[36] // Defining an index buffer
         {
             0, 1, 2,
-            2, 3, 0
+            1, 2, 3, // Top
+
+            4, 5, 6,
+            5, 6, 7, // Bottom
+
+            2, 3, 7,
+            2, 6, 7, // Left
+
+            0, 1, 4,
+            1, 5, 4, // Right
+
+            0, 2, 4,
+            2, 6, 4, // Front
+
+            3, 1, 5,
+            3, 7, 5  // Back
         };
 
         unsigned int vao;
@@ -60,13 +83,13 @@ int main(void)
         GLCall(glBindVertexArray(vao)); // Binds a vertex array object (vao)
 
         VertexArray va;
-        VertexBuffer vb(squarePositions, sizeof(squarePositions));
+        VertexBuffer vb(cubePositions, sizeof(cubePositions));
 
         VertexBufferLayout layout;
-        layout.Push<float>(2);
+        layout.Push<float>(3); // ?
         va.AddBuffer(vb, layout);
 
-        IndexBuffer ib(indices, 6);
+        IndexBuffer ib(indices, 36);
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
@@ -91,7 +114,7 @@ int main(void)
             va.Bind();
             ib.Bind();
 
-            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr));
 
             // Logic for color incrementation
             r += increment;
