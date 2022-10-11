@@ -10,8 +10,8 @@
 #include "Renderer.h"
 
 #include "VertexBuffer.h"
-
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 /* SHADER/PROGRAM GENERATION AND COMPILATION */
 // Struct for parsed GLSL code
@@ -130,13 +130,13 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl; // Displays OpenGL version in console
     {
-        float squarePositions[16] // Defining a vertex buffer
+        float squarePositions[8] // Defining a vertex buffer
         {
-            -0.5f, -0.5f,         -0.2f, -0.2f,
-             0.5f, -0.5f,          0.2f, -0.2f,
-             0.5f,  0.5f,          0.2f,  0.2f,
-            -0.5f,  0.5f,         -0.2f,  0.2f
-        };    /* big                  small */
+            -0.5f, -0.5f,
+             0.5f, -0.5f,
+             0.5f,  0.5f,
+            -0.5f,  0.5f
+        };
 
         unsigned int indices[6] // Defining an index buffer
         {
@@ -148,12 +148,12 @@ int main(void)
         glGenVertexArrays(1, &vao);
         GLCall(glBindVertexArray(vao)); // Binds a vertex array object (vao)
 
+        VertexArray va;
         VertexBuffer vb(squarePositions, sizeof(squarePositions));
 
-        GLCall(glEnableVertexAttribArray(0)); //enable attrib pointers 0 and 1 of current vao
-        GLCall(glEnableVertexAttribArray(1));
-        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(0 * sizeof(float))));
-        GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(2 * sizeof(float))));
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+        va.AddBuffer(vb, layout);
 
         IndexBuffer ib(indices, 6);
 
@@ -163,6 +163,11 @@ int main(void)
 
         GLCall(int location = glGetUniformLocation(program, "u_Color"));
         ASSERT(location != -1);
+
+        va.Unbind();
+        GLCall(glUseProgram(0));
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
         float r = 0.0f;
         float increment = 0.01f;
@@ -175,7 +180,7 @@ int main(void)
             GLCall(glUseProgram(program));
             GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-            GLCall(glBindVertexArray(vao));
+            va.Bind();
             ib.Bind();
 
             GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
