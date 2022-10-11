@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GLPrerequisites.h"
+
 #include <string>
 #include <unordered_map>
 

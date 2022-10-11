@@ -1,6 +1,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "GLPrerequisites.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -55,27 +57,27 @@ int main(void)
             2, 3, 0
         };
 
-        unsigned int vao;
-        glGenVertexArrays(1, &vao);
-        GLCall(glBindVertexArray(vao)); // Binds a vertex array object (vao)
+        VertexArray vao;
 
-        VertexArray va;
-        VertexBuffer vb(squarePositions, sizeof(squarePositions));
+        VertexBuffer vbo(squarePositions, sizeof(squarePositions));
 
         VertexBufferLayout layout;
         layout.Push<float>(2);
-        va.AddBuffer(vb, layout);
+        vao.AddBuffer(vbo, layout);
 
-        IndexBuffer ib(indices, 6);
+        IndexBuffer ibo(indices, 6);
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
-        va.Unbind();
-        vb.Unbind();
-        ib.Unbind();
+        vao.Unbind();
+        vbo.Unbind();
+        ibo.Unbind();
         shader.Unbind();
+
+        Renderer renderer;
+
 
         float r = 0.0f;
         float increment = 0.01f;
@@ -83,15 +85,12 @@ int main(void)
         while (!glfwWindowShouldClose(window))
         {
             // Render here
-            GLCall(glClear(GL_COLOR_BUFFER_BIT));
+            renderer.Clear();
 
             shader.Bind();
             shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
-            va.Bind();
-            ib.Bind();
-
-            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            renderer.Draw(vao, ibo, shader);
 
             // Logic for color incrementation
             r += increment;

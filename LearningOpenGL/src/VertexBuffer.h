@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GLPrerequisites.h"
+
 class VertexBuffer
 {
 private:

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GLPrerequisites.h"
+
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 
