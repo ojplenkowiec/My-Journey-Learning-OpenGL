@@ -112,10 +112,15 @@ void Shader::SetUniform4f(const std::string& name, float f0, float f1, float f2,
 
 unsigned int Shader::GetUniformLocation(const std::string& name)
 {
+    if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) // Checks hashmap to see if 'name' has already been declared, if so, returns the integer ID
+        return m_UniformLocationCache[name];
+
     GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
     if (location == -1)
     {
         std::cout << "Warning : Uniform '" << name << "' doesn't exist!" << std::endl;
     }
+
+    m_UniformLocationCache[name] = location; // Otherwise the hashmap is appended with the ID at 'name'
     return location;
 }
