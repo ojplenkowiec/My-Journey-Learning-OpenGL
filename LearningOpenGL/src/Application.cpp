@@ -112,13 +112,13 @@ int main(void)
 
             shader.Bind();
             shader.SetUniform1f("theta", r);
-            shader.SetUniform4f("colorVector", 0.1f, 0.3f, 0.8f, 1.0f);
+            // shader.SetUniform4f("colorVector", 0.1f, 0.3f, 0.8f, 1.0f);
 
             va.Bind();
             ib.Bind();
 
             GLCall(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr));
-            shader.SetUniform4f("colorVector", 1.0f, 0.3f, 0.8f, 0.5f);
+            // shader.SetUniform4f("colorVector", 1.0f, 0.3f, 0.8f, 0.5f);
             GLCall(glDrawElements(GL_LINE_STRIP, 36, GL_UNSIGNED_INT, nullptr));
 
             // Logic for color incrementation

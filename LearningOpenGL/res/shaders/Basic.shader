@@ -27,8 +27,6 @@ void main()
 layout(location = 0) out vec4 color;
 layout(pixel_center_integer) in vec4 gl_FragCoord;
 
-uniform vec4 colorVector = {0.0, 0.7, 1.0, 1.0};
-
 void main()
 {
     color = vec4(gl_FragCoord.xyz, 0.5);
