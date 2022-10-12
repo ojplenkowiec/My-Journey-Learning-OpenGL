@@ -29,7 +29,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(400, 400, "GOJO", NULL, NULL); // Create a windowed mode window and its OpenGL context
+    window = glfwCreateWindow(960, 540, "GOJO", NULL, NULL); // Create a windowed mode window and its OpenGL context
     if (!window)
     {
         glfwTerminate();
@@ -49,10 +49,10 @@ int main(void)
     {
         float vertexData[16] // Defining a vertex buffer
         {
-            -0.5f, -0.5f,       0.0f,  0.0f,    // 0
-             0.5f, -0.5f,       1.0f,  0.0f,    // 1
-             0.5f,  0.5f,       1.0f,  1.0f,    // 2
-            -0.5f,  0.5f,       0.0f,  1.0f     // 3
+             0.0f,   0.0f,      0.0f,  0.0f,    // 0
+             256.0f, 0.0f,      1.0f,  0.0f,    // 1
+             256.0f, 256.0f,    1.0f,  1.0f,    // 2
+             0.0f,   256.0f,    0.0f,  1.0f     // 3
         };
 
         unsigned int indices[6] // Defining an index buffer
@@ -83,7 +83,7 @@ int main(void)
         texture.Bind(0);
         shader.SetUniform1i("u_Texture", 0);
 
-        glm::mat4 projectionMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+        glm::mat4 projectionMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
         shader.SetUniformMat4f("u_MVP", projectionMatrix);
 
         vao.Unbind();
