@@ -49,10 +49,10 @@ int main(void)
     {
         float vertexData[16] // Defining a vertex buffer
         {
-             0.0f,   0.0f,      0.0f,  0.0f,    // 0
-             256.0f, 0.0f,      1.0f,  0.0f,    // 1
-             256.0f, 256.0f,    1.0f,  1.0f,    // 2
-             0.0f,   256.0f,    0.0f,  1.0f     // 3
+             -128.0f,  -128.0f,         0.0f,  0.0f,    // 0
+              128.0f,  -128.0f,         1.0f,  0.0f,    // 1
+              128.0f,   128.0f,         1.0f,  1.0f,    // 2
+             -128.0f,   128.0f,         0.0f,  1.0f     // 3
         };
 
         unsigned int indices[6] // Defining an index buffer
@@ -83,8 +83,13 @@ int main(void)
         texture.Bind(0);
         shader.SetUniform1i("u_Texture", 0);
 
-        glm::mat4 projectionMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", projectionMatrix);
+        glm::mat4 projMat = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f); // PROJECTION MATRIX (normalises positions to screen-space coordinates)
+        glm::mat4 viewMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)); // VIEW MATRIX (position of camera but inverse?)
+        glm::mat4 modelMat = glm::translate(glm::mat4(1.0f), glm::vec3(480.0f, 270.0f, 0.0f)); // MODEL MATRIX (position of model)
+
+        glm::mat4 mvpMat = projMat * viewMat * modelMat;
+
+        shader.SetUniformMat4f("u_MVP", mvpMat);
 
         vao.Unbind();
         vbo.Unbind();
