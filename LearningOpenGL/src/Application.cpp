@@ -83,6 +83,8 @@ int main(void)
         texture.Bind(0);
         shader.SetUniform1i("u_Texture", 0);
 
+        shader.SetUniform2f("u_Offset", 0, 0);
+
         glm::mat4 projectionMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
         shader.SetUniformMat4f("u_MVP", projectionMatrix);
 
@@ -95,6 +97,7 @@ int main(void)
 
         float r = 0.0f;
         float increment = 0.01f;
+        float xOffset = 0.0f;
         // Loop until the user closes the window
         while (!glfwWindowShouldClose(window))
         {
@@ -103,17 +106,19 @@ int main(void)
 
             shader.Bind();
             // shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+            shader.SetUniform2f("u_Offset", 50 * sin(r) + 480, 0);
 
             renderer.Draw(vao, ibo, shader);
 
             // Logic for color incrementation
             r += increment;
-            if (r > 1.0f) {
-                increment = -0.01f;
-            }
-            else if (r < 0.0f) {
-                increment = 0.01f;
-            }
+
+            //if (r > 1.0f) {
+            //    increment = -0.01f;
+            //}
+            //else if (r < 0.0f) {
+            //    increment = 0.01f;
+            //}
 
             // Swap front and back buffers
             GLCall(glfwSwapBuffers(window));

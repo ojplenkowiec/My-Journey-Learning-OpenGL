@@ -5,7 +5,7 @@
 Texture::Texture(const std::string& path)
 	: m_RendererID(0), m_FilePath(path), m_LocalBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0) // Initalise variables
 {
-	stbi_set_flip_vertically_on_load(1); // 1 acts as true
+	stbi_set_flip_vertically_on_load(1); // 1 is true
 	m_LocalBuffer = stbi_load(path.c_str(), &m_Width, &m_Height, &m_BPP, 4);
 
 	GLCall(glGenTextures(1, &m_RendererID));
